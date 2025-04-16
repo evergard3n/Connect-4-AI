@@ -62,7 +62,36 @@ def get_nodes(initial_pos, time_limit):
     return nodes
 
 def ucb2_agent(time_limit):
+    """
+    Creates a strategy function for selecting the next move in a game using an Upper Confidence Bound (UCB) approach.
+    
+    This function generates a strategy based on Monte Carlo Tree Search (MCTS) that uses the UCB formula to balance
+    exploration and exploitation in decision-making. It simulates random plays to evaluate potential moves and 
+    selects the move with the best score for the current player's turn.
+
+    Args:
+        time_limit (float): The time limit for running simulations in seconds.
+
+    Returns:
+        function: A strategy function that takes a position as input and returns the best move.
+    """
+
     def strat(pos):
+        """
+        Selects the best move in a given position using MCTS with UCB.
+        
+        This function takes a Connect4 position as input and returns the best move.
+        
+        Parameters
+        ----------
+        pos : Position
+            The current board position.
+        
+        Returns
+        -------
+        int
+            The column number of the best move.
+        """
         nodes = get_nodes(pos, time_limit)
 
         # set up score threshold
