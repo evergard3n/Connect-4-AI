@@ -3,7 +3,30 @@ from tkinter import messagebox
 from connect4 import Connect4
 from mcts import ucb2_agent
 import time
+import uvicorn
 import threading
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from typing import List, Optional
+
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+class GameState(BaseModel):
+    board: List[List[int]]
+    current_player: int
+    valid_moves: List[int]
+
+class AIResponse(BaseModel):
+    move: int
+
 
 class Connect4GUI:
     def __init__(self, root):
@@ -95,11 +118,11 @@ class Connect4GUI:
             return  # Wait for player's click
         self.root.after(100, self.player_turn)  # Check again soon
 
-    def on_click(self, event):
+    def on_click(self, x):
         if self.pos.terminal:
             return
         if (self.first_player and self.pos.turn == 1) or (not self.first_player and self.pos.turn == 0):
-            col = event.x // 100  # Calculate column from click position
+            col = x # Calculate column from click position
             if 0 <= col < 7 and self.board[0][col] == 0:  # Valid move
                 with self.lock:
                     row = self.board_move(col, self.pos.turn)
@@ -111,10 +134,45 @@ class Connect4GUI:
                 # Trigger computer's turn
                 self.root.after(500, self.computer_turn)
 
+@app.post("/api/connect4-move")
+async def make_move(game_state: GameState) -> AIResponse:
+    try:
+        # In ra GameState nhận được
+        print("GameState nhận được:", game_state.dict())
+        
+        if not game_state.valid_moves:
+            raise ValueError("Không có nước đi hợp lệ")
+
+        # Kiểm tra tính hợp lệ của valid_moves
+        for col in game_state.valid_moves:
+            if col < 0 or col >= 7 or game_state.board[0][col] != 0:
+                raise ValueError(f"Nước đi không hợp lệ: cột {col}")
+
+        # Chuyển đổi GameState thành Connect4 position
+        pos = create_connect4_position(game_state)
+        print("Connect4 position:", pos.result)
+        # Gọi ucb2_agent để chọn nước đi
+        selected_move = agent(pos)
+        print("Nước đi được chọn:", selected_move)
+        # Kiểm tra selected_move có trong valid_moves không
+        if selected_move not in game_state.valid_moves:
+            raise ValueError(f"ucb2_agent trả về nước đi không hợp lệ: {selected_move}")
+
+        return AIResponse(move=selected_move)
+    except Exception as e:
+        if game_state.valid_moves:
+            # Trả về nước đi đầu tiên trong valid_moves nếu có lỗi
+            return AIResponse(move=game_state.valid_moves[0])
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+
 def main():
     root = tk.Tk()
-    app = Connect4GUI(root)
+    connect4agent = Connect4GUI(root)
     root.mainloop()
+    uvicorn.run(app, host="0.0.0.0", port=8080)
+
 
 if __name__ == "__main__":
     main()

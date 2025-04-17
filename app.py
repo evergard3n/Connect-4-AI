@@ -8,7 +8,7 @@ from connect4 import Connect4
 from mcts import ucb2_agent
 
 app = FastAPI()
-agent = ucb2_agent(7)
+agent = ucb2_agent(3)
 game = Connect4()
 
 app.add_middleware(
@@ -38,16 +38,17 @@ def board_to_bitmap(board):
 class Connect4Agent:
     def __init__(self):
         self.game = Connect4()
-        self.strategy = ucb2_agent(7)
+        self.strategy = ucb2_agent(3)
         self.pos = self.game.get_initial_position()
         self.received_board = [[0 for _ in range(7)] for _ in range(6)]
         self.old_board = [[0 for _ in range(7)] for _ in range(6)]
     
-    # def board_move(self, col, turn):
-    #     for i in range(5, -1, -1):
-    #         if self.board[i][col] == 0:
-    #             self.board[i][col] = 2 if turn == 0 else 1
-    #             return
+    def board_move(self, col, turn):
+        for i in range(5, -1, -1):
+            if self.board[i][col] == 0:
+                self.board[i][col] = 2 if turn == 0 else 1
+                return i
+        return None
     
     def find_lastest_move(self): 
         for col in range(7):
@@ -64,11 +65,12 @@ class Connect4Agent:
         print('new_col:', new_col)
         self.old_board = game_state.board
         print('old_board:', self.old_board)
-        if (new_col != None):
-            self.pos = self.game.get_initial_position()
+        if (new_col != None and 0 <= new_col < 7 and self.old_board[0][new_col] == 0):
+            # self.pos = self.game.get_initial_position()
             self.pos.turn = 0
             self.pos = self.pos.move(new_col)
-
+        else:
+            self.pos = self.game.get_initial_position()
         self.pos.turn = 1
         move = self.strategy(self.pos)
         print('move:', move)
