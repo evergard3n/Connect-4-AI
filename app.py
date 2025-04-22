@@ -38,7 +38,7 @@ def board_to_bitmap(board):
 class Connect4Agent:
     def __init__(self):
         self.game = Connect4()
-        self.strategy = ucb2_agent(3)
+        self.strategy = ucb2_agent(7)
         self.pos = self.game.get_initial_position()
         self.received_board = [[0 for _ in range(7)] for _ in range(6)]
         self.old_board = [[0 for _ in range(7)] for _ in range(6)]
@@ -98,6 +98,10 @@ async def make_move(game_state: GameState) -> AIResponse:
             print('got some error')
             return AIResponse(move=game_state.valid_moves[0])
         raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/api/test")
+async def health_check():
+    return {"status": "ok", "message": "Server is running"}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8080)
