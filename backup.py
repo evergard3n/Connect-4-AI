@@ -35,6 +35,16 @@ def get_valid_locations(board):
     return [col for col in range(COLUMN_COUNT) if is_valid_location(board, col)]
 
 def get_next_open_row(board, col):
+    """
+    Get the next open row in the given column.
+
+    Args:
+        board (np.ndarray): 2D array representing the game board.
+        col (int): The column to find the next open row in.
+
+    Returns:
+        int: The row index of the next open row in the given column.
+    """
     for r in range(ROW_COUNT):
         if board[r][col] == 0:
             return r
