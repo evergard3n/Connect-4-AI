@@ -448,7 +448,7 @@ async def make_move(game_state: GameState) -> AIResponse:
             
         # Get the AI's move
         next_move = connect4_agent.get_ai_move(game_state)
-        
+        print(next_move)
         return AIResponse(move=next_move)
     except Exception as e:
         # Fallback to the first valid move if something goes wrong
