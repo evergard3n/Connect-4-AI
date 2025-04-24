@@ -299,9 +299,9 @@ class Connect4Agent:
         self.bot = pyspiel.MCTSBot(
             game=self.game,
             evaluator=pyspiel.RandomRolloutEvaluator(n_rollouts=20, seed=42),
-            uct_c=1.5,  # Exploration constant (higher values = more exploration)
+            uct_c=0.5,  # Exploration constant (higher values = more exploration)
             max_simulations=10000,  # Increase for stronger play, decrease for speed
-            max_memory_mb=1000,
+            max_memory_mb=400,
             solve=True,  # Try to solve game states when possible
             seed=42,
             verbose=False
