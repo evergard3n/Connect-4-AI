@@ -401,7 +401,7 @@ class Connect4Agent:
         else:
             # Find opponent's move since last time
             opp_col, opp_row = self.find_opponent_move(gs.board)
-            
+            print(f"Opponent moved: {opp_col}, {opp_row}")
             if opp_col is not None:
                 # Update our tracking board
                 self.old_board[opp_row][opp_col] = gs.board[opp_row][opp_col]
